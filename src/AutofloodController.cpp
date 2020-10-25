@@ -175,7 +175,7 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
     if (durationSeconds < 60)
     {
         String result = String(durationSeconds);
-        result += F(" sec");
+        result += F(" s");
         return result;
     }
 
@@ -184,7 +184,7 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
     if (durationMinutes < 60)
     {
         String result = String(durationMinutes);
-        result += F(" minutes");
+        result += F(" m");
         return result;
     }
 
@@ -192,8 +192,8 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
     unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
 
     String result = String(durationHours);
-    result += F(" hours ");
+    result += F(" h ");
     result += leftOverMinutes;
-    result += F(" minutes");
+    result += F(" m");
     return result;
 }

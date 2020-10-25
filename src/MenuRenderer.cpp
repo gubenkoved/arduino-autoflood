@@ -1,4 +1,5 @@
 #include <MenuRenderer.h>
+#include <helpers.h>
 
 MenuRenderer::MenuRenderer(Menu *menu)
 {
@@ -88,11 +89,16 @@ void SimpleDebugMenuRenderer::Render()
     {
         MenuItem *item = items[idx];
 
+        //diag();
+
         if (item == selectionStack[level])
             Serial.print(F("> "));
         else
             Serial.print(F("  "));
 
-        Serial.println(item->GetName());
+        diag();
+
+        String menuItemName = item->GetName();
+        Serial.println(menuItemName);
     }
 }

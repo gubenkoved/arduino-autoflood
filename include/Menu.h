@@ -14,7 +14,7 @@ private:
     String _name;
 public:
     MenuItem(String name);
-    const String &GetName() const;
+    String GetName() const;
     virtual MenuItemType GetType() const = 0;
 };
 
@@ -28,6 +28,8 @@ public:
 class SubMenuMenuItem : public MenuItem
 {
 private:
+    // we have to use array of pointers as arrays should hold items of the
+    // same size and our derived classes are not the same
     MenuItem **_items;
     int _count;
 

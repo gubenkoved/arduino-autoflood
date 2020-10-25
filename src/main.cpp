@@ -5,8 +5,6 @@
 #include <MenuRenderer.h>
 #include <AutofloodController.h>
 
-int outputStates[14];
-
 // http://paulmurraycbr.github.io/ArduinoTheOOWay.html
 
 Menu *menu = NULL;
@@ -33,7 +31,7 @@ void onButtonLongPress()
 // showcase the commands!
 void onCommand(int commandId)
 {
-    Serial.print("EXECUTE COMMAND ID=");
+    Serial.print(F("EXECUTE "));
     Serial.println(commandId);
 
     if (commandId == 1) // increase period
@@ -58,10 +56,8 @@ void onCommand(int commandId)
     }
     else if (commandId == 30) // test flood
     {
-        outputStates[3] = outputStates[3] == HIGH ? LOW : HIGH;
-        digitalWrite(3, outputStates[3]);
-        Serial.print("STATE ");
-        Serial.println(outputStates[3]);
+        // start in 3 seconds
+        autofloodController->SetNextActivation(3000UL);
     }
     else if (commandId == 99) // factory reset
     {
@@ -99,49 +95,70 @@ void setup()
     pinMode(12, OUTPUT);
     pinMode(13, OUTPUT);
 
-    MenuItem *periodMenuItems[] = {
-        new CommandMenuItem(1, F("+")),
-        new CommandMenuItem(2, F("-")),
-        new GoBackMenuItem()};
+    // MenuItem *periodMenuItems[] = {
+    //     new CommandMenuItem(1, F("+")),
+    //     new CommandMenuItem(2, F("-")),
+    //     new GoBackMenuItem()};
 
-    SubMenuMenuItem *periodMenu = new SubMenuMenuItem(F("period (hours)"), periodMenuItems, 3);
+    // SubMenuMenuItem *periodMenu = new SubMenuMenuItem(F("period"), periodMenuItems, 3);
 
-    MenuItem *durationMenuItems[] = {
-        new CommandMenuItem(10, F("+")),
-        new CommandMenuItem(20, F("-")),
-        new GoBackMenuItem()};
+    // MenuItem *durationMenuItems[] = {
+    //     new CommandMenuItem(10, F("+")),
+    //     new CommandMenuItem(20, F("-")),
+    //     new GoBackMenuItem()};
 
-    SubMenuMenuItem *durationMenu = new SubMenuMenuItem(F("duration (seconds)"), durationMenuItems, 3);
+    // SubMenuMenuItem *durationMenu = new SubMenuMenuItem(F("duration"), durationMenuItems, 3);
+
+    diag(1);
 
     MenuItem *factoryResetCommand = new CommandMenuItem(99, F("factory reset"));
-    MenuItem *testFloodingCommand = new CommandMenuItem(30, F("test flooding"));
+
+    diag(2);
+
+    MenuItem *testFloodingCommand = new CommandMenuItem(30, F("test"));
+
+    diag(3);
 
     MenuItem *rootItems[] =
         {
-            periodMenu,
-            durationMenu,
+            //periodMenu,
+            //durationMenu,
             testFloodingCommand,
             factoryResetCommand,
         };
 
-    SubMenuMenuItem *root = new SubMenuMenuItem(F("root"), rootItems, 4);
+    diag(4);
+
+    SubMenuMenuItem *root = new SubMenuMenuItem(F("root"), rootItems, 2);
+
+    diag(5);
 
     menu = new Menu(root, onCommand);
+
+    diag(6);
 
     //renderer = new FullDebugMenuRenderer(menu);
     renderer = new SimpleDebugMenuRenderer(menu);
 
+    diag(7);
+
     smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress);
 
-    diag();
+    diag(8);
 
     renderer->Render();
 
+    diag(9);
+
     autofloodController = new AutofloodController(onPumpControlMessage);
+
+    diag(10);
 
     autofloodController->SetPeriod(10UL);
     autofloodController->SetPumpDuration(1000UL);
     autofloodController->SetNextActivation(10000UL);
+
+    diag(11);
 
     // load the stored settings
     autofloodController->LoadFromMemory();
@@ -184,5 +201,7 @@ void loop()
         Serial.print(AutofloodController::PrettyPrintDuration(durationMs));
         Serial.print(F(" NEXT ACTIVATION "));
         Serial.println(AutofloodController::PrettyPrintDuration(nextActivationMs));
+
+        diag();
     }
 }

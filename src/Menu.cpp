@@ -6,7 +6,7 @@ MenuItem::MenuItem(String name)
     _name = name;
 }
 
-const String &MenuItem::GetName() const
+String MenuItem::GetName() const
 {
     return _name;
 }
