@@ -14,7 +14,7 @@ String MenuItem::GetName() const
 // *****************************************************************************
 
 GoBackMenuItem::GoBackMenuItem()
-    : MenuItem(F("<back>"))
+    : MenuItem("<back>")
 {
 }
 
@@ -82,23 +82,20 @@ MenuItemType CommandMenuItem::GetType() const
 
 // *****************************************************************************
 
-Menu::Menu(SubMenuMenuItem *rootSubmenu, void(*onCommand)(int), int maxLevel)
+Menu::Menu(SubMenuMenuItem *rootSubmenu, void (*onCommand)(int))
 {
-    Serial.println(F("initializing the menu..."));
+    Serial.println("initializing the menu...");
 
     _onCommand = onCommand;
     _root = rootSubmenu;
     _level = 1;
-    _selection = new MenuItem *[maxLevel];
     _selection[0] = rootSubmenu;
-
-    // when we start select the first element
-    _selection[1] = rootSubmenu->GetItems()[0];
+    _selection[1] = rootSubmenu->GetItems()[0]; // when we start select the first element
 }
 
 Menu::~Menu()
 {
-    Serial.println(F("destructing the menu"));
+    Serial.println("destructing the menu");
 }
 
 void Menu::Next()
@@ -127,7 +124,7 @@ void Menu::Exec()
 
     if (selectedType == 0)
     {
-        Serial.println(F("GO TO SUBMENU"));
+        Serial.println("GO TO SUBMENU");
 
         SubMenuMenuItem *nextMenu = static_cast<SubMenuMenuItem *>(selected);
         _level = _level + 1;
@@ -135,7 +132,7 @@ void Menu::Exec()
     }
     else if (selectedType == 2)
     {
-        Serial.println(F("GOING BACK"));
+        Serial.println("GOING BACK");
         _level = _level - 1;
     }
     else if (selectedType == 1)
@@ -146,9 +143,10 @@ void Menu::Exec()
         {
             int commandId = commandItem->CommandId();
             _onCommand(commandId);
-        } else
+        }
+        else
         {
-            Serial.print(F("COMMAND HANDLER NOT SPECIFIED"));
+            Serial.print("COMMAND HANDLER NOT SPECIFIED");
         }
     }
 }

@@ -14,11 +14,13 @@ int freeMemory()
 
 void diag(int id)
 {
-    Serial.print(F("DIAG "));
+#ifdef EXTENDED_DEBUG
+    Serial.print("*** DIAG ");
     Serial.print(id);
-    Serial.print(F(" FREE "));
+    Serial.print(" FREE ");
     Serial.print(freeMemory());
-    Serial.println(F(" B"));
+    Serial.println(" B");
 
     delay(100);
+#endif
 }

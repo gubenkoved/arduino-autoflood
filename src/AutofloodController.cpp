@@ -14,7 +14,7 @@ AutofloodController::AutofloodController(PumpControlFn pumpControlFn)
 
 void AutofloodController::SetPeriod(unsigned long periodSeconds)
 {
-    Serial.print(F("Updating pump period "));
+    Serial.print("Updating pump period ");
     Serial.println(AutofloodController::PrettyPrintDuration(periodSeconds * 1000));
 
     _periodSeconds = periodSeconds;
@@ -27,7 +27,7 @@ unsigned long AutofloodController::GetPeriodSeconds()
 
 void AutofloodController::SetPumpDuration(unsigned long pumpDurationMs)
 {
-    Serial.print(F("Updating pump duration "));
+    Serial.print("Updating pump duration ");
     Serial.println(AutofloodController::PrettyPrintDuration(pumpDurationMs));
 
     _pumpDurationMs = pumpDurationMs;
@@ -40,7 +40,7 @@ unsigned long AutofloodController::GetPumpDurationMs()
 
 void AutofloodController::SetNextActivation(unsigned long nextActivationMs)
 {
-    Serial.print(F("Updating next activation time "));
+    Serial.print("Updating next activation time ");
     Serial.println(AutofloodController::PrettyPrintDuration(nextActivationMs));
 
     _nextActivationMs = nextActivationMs;
@@ -58,7 +58,7 @@ unsigned long AutofloodController::GetNextActivationMs()
 
 void AutofloodController::LoadFromMemory()
 {
-    Serial.println(F("Loading data from EEPROM..."));
+    Serial.println("Loading data from EEPROM...");
 
     AutofloodStoredState state;
 
@@ -66,10 +66,10 @@ void AutofloodController::LoadFromMemory()
 
     if (state.Version != VERSION)
     {
-        Serial.println(F("Performing factory reset due to version mismatch..."));
-        Serial.print(F("CONTROLLER VERSION "));
+        Serial.println("Performing factory reset due to version mismatch...");
+        Serial.print("CONTROLLER VERSION ");
         Serial.print(VERSION);
-        Serial.print(F(" EEPROM STORED VERSION "));
+        Serial.print(" EEPROM STORED VERSION ");
         Serial.println(state.Version);
 
         FactoryReset();
@@ -84,7 +84,7 @@ void AutofloodController::LoadFromMemory()
 
 void AutofloodController::SaveToMemory()
 {
-    Serial.println(F("Saving settings to EEPROM..."));
+    Serial.println("Saving settings to EEPROM...");
     AutofloodStoredState state = AutofloodStoredState();
 
     state.Version = VERSION;
@@ -97,7 +97,7 @@ void AutofloodController::SaveToMemory()
 
 void AutofloodController::FactoryReset()
 {
-    Serial.println(F("Factory reset..."));
+    Serial.println("Factory reset...");
 
     _periodSeconds = 60UL * 60UL * 24UL;       // every day
     _pumpDurationMs = 2000UL;                  // two seconds
@@ -153,10 +153,10 @@ void AutofloodController::HandleElapsed(unsigned long elapsedMs)
 String AutofloodController::StateToString(AutofloodState state)
 {
     if (state == AutofloodState::Waiting)
-        return F("WAITING");
+        return "WAITING";
 
     if (state == AutofloodState::Flooding)
-        return F("FLOODING");
+        return "FLOODING";
 
     return String(state);
 }
@@ -166,7 +166,7 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
     if (durationMs < 1000)
     {
         String result = String(durationMs);
-        result += F(" ms");
+        result += " ms";
         return result;
     }
 
@@ -174,8 +174,17 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
 
     if (durationSeconds < 60)
     {
+        unsigned long leftOverMs = durationMs - durationSeconds * 1000UL;
+
         String result = String(durationSeconds);
-        result += F(" s");
+        result += " s ";
+
+        if (leftOverMs != 0)
+        {
+            result += leftOverMs;
+            result += " ms";
+        }
+
         return result;
     }
 
@@ -184,7 +193,7 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
     if (durationMinutes < 60)
     {
         String result = String(durationMinutes);
-        result += F(" m");
+        result += " m";
         return result;
     }
 
@@ -192,8 +201,8 @@ String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
     unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
 
     String result = String(durationHours);
-    result += F(" h ");
+    result += " h ";
     result += leftOverMinutes;
-    result += F(" m");
+    result += " m";
     return result;
 }

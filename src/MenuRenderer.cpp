@@ -9,7 +9,7 @@ MenuRenderer::MenuRenderer(Menu *menu)
 void FullDebugMenuRenderer::PrintSpaces(int n)
 {
     for (int i = 0; i < n; i += 1)
-        Serial.print(F(" "));
+        Serial.print(" ");
 }
 
 void FullDebugMenuRenderer::RenderImpl(MenuItem *item, int indent)
@@ -33,7 +33,7 @@ void FullDebugMenuRenderer::RenderImpl(MenuItem *item, int indent)
     else
     {
         PrintSpaces(indent - 2);
-        Serial.print(F("> "));
+        Serial.print("> ");
     }
 
     // skip root
@@ -55,11 +55,11 @@ void FullDebugMenuRenderer::RenderImpl(MenuItem *item, int indent)
 FullDebugMenuRenderer::FullDebugMenuRenderer(Menu *menu)
     : MenuRenderer(menu)
 {
-    Serial.println(F("FullDebugMenuRenderer::ctor"));
+    Serial.println("FullDebugMenuRenderer::ctor");
 }
 FullDebugMenuRenderer::~FullDebugMenuRenderer()
 {
-    Serial.println(F("~FullDebugMenuRenderer"));
+    Serial.println("~FullDebugMenuRenderer");
 }
 
 void FullDebugMenuRenderer::Render()
@@ -73,11 +73,13 @@ void FullDebugMenuRenderer::Render()
 SimpleDebugMenuRenderer::SimpleDebugMenuRenderer(Menu *menu)
     : MenuRenderer(menu)
 {
-    Serial.println(F("SimpleDebugMenuRenderer::ctor"));
+    Serial.println("SimpleDebugMenuRenderer::ctor");
 }
 
 void SimpleDebugMenuRenderer::Render()
 {
+    diag(100);
+
     int level = _menu->GetLevel();
     MenuItem **selectionStack = _menu->GetSelectionStack();
     SubMenuMenuItem *container = static_cast<SubMenuMenuItem *>(selectionStack[level - 1]);
@@ -85,20 +87,54 @@ void SimpleDebugMenuRenderer::Render()
     int n = container->Count();
     MenuItem **items = container->GetItems();
 
+    // Serial.print("LEVEL ");
+    // Serial.print(level);
+    // Serial.print(" SELECTION STACK PTR ");
+    // Serial.print((int)selectionStack);
+    // Serial.print(" CONTRAINER PTR ");
+    // Serial.print((int)container);
+    // Serial.print(" ITEMS PTR ");
+    // Serial.print((int)items);
+    // Serial.println();
+
+    // for (int idx = 0; idx < n; idx += 1)
+    // {
+    //     MenuItem *item = items[idx];
+    //     MenuItem **item2Ptr = items + idx;
+
+    //     // Serial.print("IDX ");
+    //     // Serial.print(idx);
+    //     // Serial.print(" PTR ");
+    //     // Serial.print((int)item);
+    //     // Serial.print(" PTR2 ");
+    //     // Serial.print((int)*item2Ptr);
+    //     // Serial.print(" PTR2 PTR ");
+    //     // Serial.print((int)item2Ptr);
+    //     // Serial.print(" SIZEOF PTR ");
+    //     // Serial.print(sizeof(MenuItem*));
+    //     // Serial.print(" SIZEOF PTR PTR ");
+    //     // Serial.print(sizeof(MenuItem**));
+    //     // Serial.print(" SIZEOF MENU ITEM ");
+    //     // Serial.print(sizeof(MenuItem));
+    //     // Serial.println();
+    // }
+
     for (int idx = 0; idx < n; idx += 1)
     {
         MenuItem *item = items[idx];
 
-        //diag();
+        // diag(101);
+        // Serial.println((int)item);
 
         if (item == selectionStack[level])
-            Serial.print(F("> "));
+            Serial.print("> ");
         else
-            Serial.print(F("  "));
+            Serial.print("  ");
 
-        diag();
-
-        String menuItemName = item->GetName();
+        const String &menuItemName = item->GetName();
         Serial.println(menuItemName);
+        // Serial.println(" MENU ITEM NAME HERE");
     }
+
+    Serial.flush();
 }

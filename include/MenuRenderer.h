@@ -20,6 +20,7 @@ private:
 
     void PrintSpaces(int n);
     void RenderImpl(MenuItem *item, int indent);
+
 public:
     FullDebugMenuRenderer(Menu *menu);
     ~FullDebugMenuRenderer();

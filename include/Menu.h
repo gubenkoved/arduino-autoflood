@@ -58,10 +58,10 @@ class Menu
 private:
     SubMenuMenuItem *_root;
     int _level;
-    MenuItem **_selection;
+    MenuItem *_selection[5];
     void(*_onCommand)(int);
 public:
-    Menu(SubMenuMenuItem *rootSubmenu, void(*onCommand)(int) = NULL, int maxLevel = 5);
+    Menu(SubMenuMenuItem *rootSubmenu, void(*onCommand)(int) = NULL);
     ~Menu();
     void Next();
     void Exec();

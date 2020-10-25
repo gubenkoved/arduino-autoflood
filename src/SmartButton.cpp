@@ -3,7 +3,7 @@
 
 SmartButton::SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)(), unsigned int longPressThresholdMs)
 {
-    Serial.println(F("SmartButton::ctor"));
+    Serial.println("SmartButton::ctor");
 
     _pin = pin;
     _onShortPress = onShortPress;
@@ -28,9 +28,9 @@ void SmartButton::loop()
             unsigned long duration = millis() - _pressedAt;
             _pressedAt = 0;
 
-            Serial.print(F("Button is released, duration was "));
+            Serial.print("Button is released, duration was ");
             Serial.print(duration);
-            Serial.println(F("ms"));
+            Serial.println("ms");
 
             if (duration >= _longPressThresholdMs)
             {
@@ -49,7 +49,7 @@ void SmartButton::loop()
         if (_pressedAt == 0)
         {
             _pressedAt = millis();
-            Serial.print(F("Pressed at "));
+            Serial.print("Pressed at ");
             Serial.println(_pressedAt);
         }
     }
