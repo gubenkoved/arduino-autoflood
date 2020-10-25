@@ -15,7 +15,8 @@ SmartButton *smartButton = NULL;
 AutofloodController *autofloodController = NULL;
 
 unsigned long lastTime;
-const int pumpPin = 2;
+const int buttonPin = 2;
+const int pumpPin = 12;
 
 void onButtonShortPress()
 {
@@ -35,25 +36,36 @@ void onCommand(int commandId)
     Serial.print("EXECUTE COMMAND ID=");
     Serial.println(commandId);
 
-    if (commandId == 1)
+    if (commandId == 1) // increase period
     {
         int currentPeriod = autofloodController->GetPeriodSeconds();
         autofloodController->SetPeriod(currentPeriod + 1);
     }
-    else if (commandId == 2)
+    else if (commandId == 2) // descrease period
     {
         int currentPeriod = autofloodController->GetPeriodSeconds();
         autofloodController->SetPeriod(currentPeriod - 1);
     }
-    else if (commandId == 10)
+    else if (commandId == 10) // increase pump duration
     {
         int currentDurationMs = autofloodController->GetPumpDurationMs();
         autofloodController->SetPumpDuration(currentDurationMs + 500);
     }
-    else if (commandId == 11)
+    else if (commandId == 11) // decrease pump duration
     {
         int currentDurationMs = autofloodController->GetPumpDurationMs();
         autofloodController->SetPumpDuration(currentDurationMs - 500);
+    }
+    else if (commandId == 30) // test flood
+    {
+        outputStates[3] = outputStates[3] == HIGH ? LOW : HIGH;
+        digitalWrite(3, outputStates[3]);
+        Serial.print("STATE ");
+        Serial.println(outputStates[3]);
+    }
+    else if (commandId == 99) // factory reset
+    {
+        autofloodController->FactoryReset();
     }
 }
 
@@ -81,9 +93,10 @@ void setup()
 
     Serial.println(F("AUTOFLOOD :: BOOTING UP"));
 
-    pinMode(1, OUTPUT);
-    pinMode(2, OUTPUT);
-    pinMode(3, OUTPUT);
+    // pinMode(1, OUTPUT);
+    pinMode(2, INPUT);
+    //pinMode(3, OUTPUT);
+    pinMode(12, OUTPUT);
     pinMode(13, OUTPUT);
 
     MenuItem *periodMenuItems[] = {
@@ -100,18 +113,25 @@ void setup()
 
     SubMenuMenuItem *durationMenu = new SubMenuMenuItem(F("duration (seconds)"), durationMenuItems, 3);
 
-    MenuItem *factoryResetCommand = new CommandMenuItem(0, F("factory reset"));
+    MenuItem *factoryResetCommand = new CommandMenuItem(99, F("factory reset"));
+    MenuItem *testFloodingCommand = new CommandMenuItem(30, F("test flooding"));
 
-    MenuItem *rootItems[] = {periodMenu, durationMenu, factoryResetCommand};
+    MenuItem *rootItems[] =
+        {
+            periodMenu,
+            durationMenu,
+            testFloodingCommand,
+            factoryResetCommand,
+        };
 
-    SubMenuMenuItem *root = new SubMenuMenuItem(F("root"), rootItems, 3);
+    SubMenuMenuItem *root = new SubMenuMenuItem(F("root"), rootItems, 4);
 
     menu = new Menu(root, onCommand);
 
     //renderer = new FullDebugMenuRenderer(menu);
     renderer = new SimpleDebugMenuRenderer(menu);
 
-    smartButton = new SmartButton(5, onButtonShortPress, onButtonLongPress);
+    smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress);
 
     diag();
 
@@ -119,9 +139,12 @@ void setup()
 
     autofloodController = new AutofloodController(onPumpControlMessage);
 
-    autofloodController->SetPeriod(10);
-    autofloodController->SetPumpDuration(1000);
-    autofloodController->SetNextActivation(10000);
+    autofloodController->SetPeriod(10UL);
+    autofloodController->SetPumpDuration(1000UL);
+    autofloodController->SetNextActivation(10000UL);
+
+    // load the stored settings
+    autofloodController->LoadFromMemory();
 
     lastTime = millis();
 }
@@ -132,12 +155,12 @@ void loop()
 {
     unsigned long currentTime = millis();
     unsigned long elapsedMs = currentTime - lastTime;
+
     lastTime = currentTime;
 
     smartButton->loop();
     autofloodController->HandleElapsed(elapsedMs);
 
-    
     if (currentTime - lastStatTime > 1000)
     {
         // Serial.print("CURRENT TIME");
@@ -149,17 +172,17 @@ void loop()
 
         // debug stats
         AutofloodState state = autofloodController->GetState();
-        int periodSec = autofloodController->GetPeriodSeconds();
-        int durationMs = autofloodController->GetPumpDurationMs();
-        int nextActivationMs = autofloodController->GetNextActivationMs();
+        unsigned long periodSec = autofloodController->GetPeriodSeconds();
+        unsigned long durationMs = autofloodController->GetPumpDurationMs();
+        unsigned long nextActivationMs = autofloodController->GetNextActivationMs();
 
         Serial.print(F("STATE "));
-        Serial.print(state);
+        Serial.print(AutofloodController::StateToString(state));
         Serial.print(F(" PERIOD "));
-        Serial.print(periodSec);
+        Serial.print(AutofloodController::PrettyPrintDuration(periodSec * 1000UL));
         Serial.print(F(" DURATION "));
-        Serial.print(durationMs);
+        Serial.print(AutofloodController::PrettyPrintDuration(durationMs));
         Serial.print(F(" NEXT ACTIVATION "));
-        Serial.println(nextActivationMs);
+        Serial.println(AutofloodController::PrettyPrintDuration(nextActivationMs));
     }
 }

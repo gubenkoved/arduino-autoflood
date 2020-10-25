@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <SmartButton.h>
 
-SmartButton::SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)(), int longPressThresholdMs)
+SmartButton::SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)(), unsigned int longPressThresholdMs)
 {
     Serial.println(F("SmartButton::ctor"));
 

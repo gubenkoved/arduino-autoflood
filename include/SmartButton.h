@@ -8,11 +8,11 @@ private:
     int _pin;
     void (*_onShortPress)();
     void (*_onLongPress)();
-    int _longPressThresholdMs;
+    unsigned int _longPressThresholdMs;
     int _lastState = LOW;
     unsigned long _pressedAt = 0;
 public:
-    SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)() = NULL, int longPressThresholdMs = 1000);
+    SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)() = NULL, unsigned int longPressThresholdMs = 1000U);
     void setup();
     void loop();
 };
