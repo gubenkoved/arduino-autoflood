@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <SmartButton.h>
+#include <helpers.h>
 
 SmartButton::SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)(), unsigned int longPressThresholdMs)
 {
-    Serial.println(F("SmartButton::ctor"));
+    debugln(F("SmartButton::ctor"));
 
     _pin = pin;
     _onShortPress = onShortPress;
@@ -28,9 +29,9 @@ void SmartButton::loop()
             unsigned long duration = millis() - _pressedAt;
             _pressedAt = 0;
 
-            Serial.print(F("Button is released, duration was "));
-            Serial.print(duration);
-            Serial.println(F("ms"));
+            debug(F("Button is released, duration was "));
+            debug(duration);
+            debugln(F("ms"));
 
             if (duration >= _longPressThresholdMs)
             {
@@ -49,8 +50,8 @@ void SmartButton::loop()
         if (_pressedAt == 0)
         {
             _pressedAt = millis();
-            Serial.print(F("Pressed at "));
-            Serial.println(_pressedAt);
+            debug(F("Pressed at "));
+            debugln(_pressedAt);
         }
     }
 

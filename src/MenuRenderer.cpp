@@ -1,4 +1,5 @@
 #include <MenuRenderer.h>
+#include <helpers.h>
 
 MenuRenderer::MenuRenderer(Menu *menu)
 {
@@ -54,11 +55,11 @@ void FullDebugMenuRenderer::RenderImpl(MenuItem *item, int indent)
 FullDebugMenuRenderer::FullDebugMenuRenderer(Menu *menu)
     : MenuRenderer(menu)
 {
-    Serial.println(F("FullDebugMenuRenderer::ctor"));
+    debugln(F("FullDebugMenuRenderer::ctor"));
 }
 FullDebugMenuRenderer::~FullDebugMenuRenderer()
 {
-    Serial.println(F("~FullDebugMenuRenderer"));
+    debugln(F("~FullDebugMenuRenderer"));
 }
 
 void FullDebugMenuRenderer::Render()
@@ -72,7 +73,7 @@ void FullDebugMenuRenderer::Render()
 SimpleDebugMenuRenderer::SimpleDebugMenuRenderer(Menu *menu)
     : MenuRenderer(menu)
 {
-    Serial.println(F("SimpleDebugMenuRenderer::ctor"));
+    debugln(F("SimpleDebugMenuRenderer::ctor"));
 }
 
 void SimpleDebugMenuRenderer::Render()

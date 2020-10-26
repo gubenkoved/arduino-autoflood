@@ -5,8 +5,6 @@
 #include <MenuRenderer.h>
 #include <AutofloodController.h>
 
-int outputStates[14];
-
 // http://paulmurraycbr.github.io/ArduinoTheOOWay.html
 
 Menu *menu = NULL;
@@ -33,28 +31,50 @@ void onButtonLongPress()
 // showcase the commands!
 void onCommand(int commandId)
 {
-    Serial.print("EXECUTE COMMAND ID=");
-    Serial.println(commandId);
+    debug("EXECUTE COMMAND ID=");
+    debugln(commandId);
 
-    if (commandId == 1) // increase period
+    unsigned long currentPeriodSeconds = autofloodController->GetPeriodSeconds();
+    unsigned long currentDurationMs = autofloodController->GetPumpDurationMs();
+
+    if (commandId == 1) // period: +1h
     {
-        int currentPeriod = autofloodController->GetPeriodSeconds();
-        autofloodController->SetPeriod(currentPeriod + 1);
+        autofloodController->SetPeriod(currentPeriodSeconds + 60 * 60);
     }
-    else if (commandId == 2) // descrease period
+    else if (commandId == 2) // period: -1h
     {
-        int currentPeriod = autofloodController->GetPeriodSeconds();
-        autofloodController->SetPeriod(currentPeriod - 1);
+        autofloodController->SetPeriod(currentPeriodSeconds - 60 * 60);
+    }
+    else if (commandId == 3) // period: +5m
+    {
+        autofloodController->SetPeriod(currentPeriodSeconds + 60 * 5);
+    }
+    else if (commandId == 4) // period: -5m
+    {
+        autofloodController->SetPeriod(currentPeriodSeconds - 60 * 5);
+    }
+    else if (commandId == 5) // period x2
+    {
+        autofloodController->SetPeriod(currentPeriodSeconds * 2);
+    }
+    else if (commandId == 6) // period 1/2
+    {
+        autofloodController->SetPeriod(currentPeriodSeconds / 2);
     }
     else if (commandId == 10) // increase pump duration
     {
-        int currentDurationMs = autofloodController->GetPumpDurationMs();
         autofloodController->SetPumpDuration(currentDurationMs + 500);
     }
     else if (commandId == 11) // decrease pump duration
     {
-        int currentDurationMs = autofloodController->GetPumpDurationMs();
-        autofloodController->SetPumpDuration(currentDurationMs - 500);
+        // safety measure, prevent the overflow to high values
+        if (currentDurationMs > 500)
+        {
+            autofloodController->SetPumpDuration(currentDurationMs - 500);
+        } else
+        {
+            debugln(F("unable to decrease the duration more!"));
+        }
     }
     else if (commandId == 30) // test flood
     {
@@ -69,8 +89,8 @@ void onCommand(int commandId)
 
 void onPumpControlMessage(PumpControlMessage message)
 {
-    Serial.print("PUMP CONTROLL MESSAGE: ");
-    Serial.println(message);
+    debug("PUMP CONTROLL MESSAGE: ");
+    debugln(message);
 
     if (message == PumpControlMessage::Open)
     {
@@ -85,28 +105,32 @@ void onPumpControlMessage(PumpControlMessage message)
 void setup()
 {
     Serial.begin(9600);
+
+    // wait for serial port to connect. Needed for native USB port only
     while (!Serial)
     {
-    } // wait for serial port to connect. Needed for native USB port only
+    }
 
-    Serial.println(F("AUTOFLOOD :: BOOTING UP"));
+    debugln(F("AUTOFLOOD :: BOOTING UP"));
+    debugln("DEBUGGING MODE!");
 
-    // pinMode(1, OUTPUT);
-    pinMode(2, INPUT);
-    //pinMode(3, OUTPUT);
-    pinMode(12, OUTPUT);
-    pinMode(13, OUTPUT);
+    pinMode(buttonPin, INPUT);
+    pinMode(pumpPin, OUTPUT);
 
     MenuItem *periodMenuItems[] = {
-        new CommandMenuItem(1, "+"),
-        new CommandMenuItem(2, "-"),
+        new CommandMenuItem(1, "+ 1h"),
+        new CommandMenuItem(2, "- 1h"),
+        new CommandMenuItem(3, "+ 5m"),
+        new CommandMenuItem(4, "- 5m"),
+        new CommandMenuItem(5, "x2"),
+        new CommandMenuItem(6, "1/2"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *periodMenu = new SubMenuMenuItem("period (hours)", periodMenuItems, 3);
+    SubMenuMenuItem *periodMenu = new SubMenuMenuItem("period", periodMenuItems, 7);
 
     MenuItem *durationMenuItems[] = {
-        new CommandMenuItem(10, "+"),
-        new CommandMenuItem(20, "-"),
+        new CommandMenuItem(10, "+ 0.5s"),
+        new CommandMenuItem(11, "- 0.5s"),
         new GoBackMenuItem()};
 
     SubMenuMenuItem *durationMenu = new SubMenuMenuItem("duration (seconds)", durationMenuItems, 3);
@@ -129,7 +153,7 @@ void setup()
     //renderer = new FullDebugMenuRenderer(menu);
     renderer = new SimpleDebugMenuRenderer(menu);
 
-    smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress);
+    smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress, LONG_PRESS_THRESHOLD);
 
     diag();
 
@@ -159,13 +183,8 @@ void loop()
     smartButton->loop();
     autofloodController->HandleElapsed(elapsedMs);
 
-    if (currentTime - lastStatTime > 1000)
+    if (currentTime - lastStatTime > DEBUG_STATE_REPORT_INTERVAL_SECONDS * 1000UL)
     {
-        // Serial.print("CURRENT TIME");
-        // Serial.print(currentTime);
-        // Serial.print(" LAST STATS TIME");
-        // Serial.println(lastStatTime);
-
         lastStatTime = currentTime;
 
         // debug stats
@@ -174,13 +193,13 @@ void loop()
         unsigned long durationMs = autofloodController->GetPumpDurationMs();
         unsigned long nextActivationMs = autofloodController->GetNextActivationMs();
 
-        Serial.print(F("STATE "));
-        Serial.print(AutofloodController::StateToString(state));
-        Serial.print(F(" PERIOD "));
-        Serial.print(AutofloodController::PrettyPrintDuration(periodSec * 1000UL));
-        Serial.print(F(" DURATION "));
-        Serial.print(AutofloodController::PrettyPrintDuration(durationMs));
-        Serial.print(F(" NEXT ACTIVATION "));
-        Serial.println(AutofloodController::PrettyPrintDuration(nextActivationMs));
+        debug(F("STATE "));
+        debug(AutofloodController::StateToString(state));
+        debug(F(" PERIOD "));
+        debug(AutofloodController::PrettyPrintDuration(periodSec * 1000UL));
+        debug(F(" DURATION "));
+        debug(AutofloodController::PrettyPrintDuration(durationMs));
+        debug(F(" NEXT ACTIVATION "));
+        debugln(AutofloodController::PrettyPrintDuration(nextActivationMs));
     }
 }

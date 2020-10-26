@@ -1,5 +1,6 @@
 #include <AutofloodController.h>
 #include <EEPROM.h>
+#include <helpers.h>
 
 AutofloodController::AutofloodController(PumpControlFn pumpControlFn)
 {
@@ -14,8 +15,8 @@ AutofloodController::AutofloodController(PumpControlFn pumpControlFn)
 
 void AutofloodController::SetPeriod(unsigned long periodSeconds)
 {
-    Serial.print(F("Updating pump period "));
-    Serial.println(AutofloodController::PrettyPrintDuration(periodSeconds * 1000));
+    debug(F("Updating pump period "));
+    debugln(AutofloodController::PrettyPrintDuration(periodSeconds * 1000));
 
     _periodSeconds = periodSeconds;
 }
@@ -27,8 +28,8 @@ unsigned long AutofloodController::GetPeriodSeconds()
 
 void AutofloodController::SetPumpDuration(unsigned long pumpDurationMs)
 {
-    Serial.print(F("Updating pump duration "));
-    Serial.println(AutofloodController::PrettyPrintDuration(pumpDurationMs));
+    debug(F("Updating pump duration "));
+    debugln(AutofloodController::PrettyPrintDuration(pumpDurationMs));
 
     _pumpDurationMs = pumpDurationMs;
 }
@@ -40,8 +41,8 @@ unsigned long AutofloodController::GetPumpDurationMs()
 
 void AutofloodController::SetNextActivation(unsigned long nextActivationMs)
 {
-    Serial.print(F("Updating next activation time "));
-    Serial.println(AutofloodController::PrettyPrintDuration(nextActivationMs));
+    debug(F("Updating next activation time "));
+    debugln(AutofloodController::PrettyPrintDuration(nextActivationMs));
 
     _nextActivationMs = nextActivationMs;
 }
@@ -58,7 +59,7 @@ unsigned long AutofloodController::GetNextActivationMs()
 
 void AutofloodController::LoadFromMemory()
 {
-    Serial.println(F("Loading data from EEPROM..."));
+    debugln(F("Loading data from EEPROM..."));
 
     AutofloodStoredState state;
 
@@ -66,11 +67,11 @@ void AutofloodController::LoadFromMemory()
 
     if (state.Version != VERSION)
     {
-        Serial.println(F("Performing factory reset due to version mismatch..."));
-        Serial.print(F("CONTROLLER VERSION "));
-        Serial.print(VERSION);
-        Serial.print(F(" EEPROM STORED VERSION "));
-        Serial.println(state.Version);
+        debugln(F("Performing factory reset due to version mismatch..."));
+        debug(F("CONTROLLER VERSION "));
+        debug(VERSION);
+        debug(F(" EEPROM STORED VERSION "));
+        debugln(state.Version);
 
         FactoryReset();
         return;
@@ -84,7 +85,7 @@ void AutofloodController::LoadFromMemory()
 
 void AutofloodController::SaveToMemory()
 {
-    Serial.println(F("Saving settings to EEPROM..."));
+    debugln(F("Saving settings to EEPROM..."));
     AutofloodStoredState state = AutofloodStoredState();
 
     state.Version = VERSION;
@@ -97,7 +98,7 @@ void AutofloodController::SaveToMemory()
 
 void AutofloodController::FactoryReset()
 {
-    Serial.println(F("Factory reset..."));
+    debugln(F("Factory reset..."));
 
     _periodSeconds = 60UL * 60UL * 24UL;       // every day
     _pumpDurationMs = 2000UL;                  // two seconds
@@ -141,9 +142,9 @@ void AutofloodController::HandleElapsed(unsigned long elapsedMs)
     unsigned long currentTime = millis();
 
     // autosave logic
-    if ((currentTime - _lastAutoSaveTime) > AUTO_SAVE_PERIOD_SECONDS * 1000UL)
+    if ((currentTime - _lastAutoSaveTime) > AUTOSAVE_INTERVAL_SECONDS * 1000UL)
     {
-        Serial.println("Triggering auto save...");
+        debugln("Triggering auto save...");
         SaveToMemory();
         _lastAutoSaveTime = currentTime;
     }

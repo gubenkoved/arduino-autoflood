@@ -37,7 +37,6 @@ class AutofloodController
     PumpControlFn _pumpControlFn;
     unsigned long _lastAutoSaveTime;
 
-    const long AUTO_SAVE_PERIOD_SECONDS = 10;
     const int EEPROM_START_ADDRESS = 0; // const for now
     const int VERSION = 1;              // changing version leads to the factory reset!
 

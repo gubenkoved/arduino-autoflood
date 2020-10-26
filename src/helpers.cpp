@@ -14,8 +14,8 @@ int freeMemory()
 
 void diag()
 {
-    Serial.print(F("FREE MEMORY: "));
+    debug(F("FREE MEMORY: "));
     int free = freeMemory();
-    Serial.println(free);
-    delay(100);
+    debugln(free);
+    Serial.flush();
 }

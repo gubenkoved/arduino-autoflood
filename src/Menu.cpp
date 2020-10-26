@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Menu.h>
+#include <helpers.h>
 
 MenuItem::MenuItem(const char *name)
 {
@@ -84,7 +85,7 @@ MenuItemType CommandMenuItem::GetType() const
 
 Menu::Menu(SubMenuMenuItem *rootSubmenu, void(*onCommand)(int), int maxLevel)
 {
-    Serial.println(F("initializing the menu..."));
+    debugln(F("initializing the menu..."));
 
     _onCommand = onCommand;
     _root = rootSubmenu;
@@ -98,7 +99,7 @@ Menu::Menu(SubMenuMenuItem *rootSubmenu, void(*onCommand)(int), int maxLevel)
 
 Menu::~Menu()
 {
-    Serial.println(F("destructing the menu"));
+    debugln(F("destructing the menu"));
 }
 
 void Menu::Next()
@@ -110,13 +111,13 @@ void Menu::Next()
     int curIdx = container->IndexOf(selected);
     int nextIdx = (curIdx + 1) % n;
 
-    // Serial.print("NEXT IDX: ");
-    // Serial.println(nextIdx);
+    // debug("NEXT IDX: ");
+    // debugln(nextIdx);
 
     _selection[_level] = container->GetByIndex(nextIdx);
 
-    // Serial.print("SELECTION: ");
-    // Serial.println(_selection[_level]->GetName());
+    // debug("SELECTION: ");
+    // debugln(_selection[_level]->GetName());
 }
 
 void Menu::Exec()
@@ -127,7 +128,7 @@ void Menu::Exec()
 
     if (selectedType == 0)
     {
-        Serial.println(F("GO TO SUBMENU"));
+        debugln(F("GO TO SUBMENU"));
 
         SubMenuMenuItem *nextMenu = static_cast<SubMenuMenuItem *>(selected);
         _level = _level + 1;
@@ -135,7 +136,7 @@ void Menu::Exec()
     }
     else if (selectedType == 2)
     {
-        Serial.println(F("GOING BACK"));
+        debugln(F("GOING BACK"));
         _level = _level - 1;
     }
     else if (selectedType == 1)
@@ -148,7 +149,7 @@ void Menu::Exec()
             _onCommand(commandId);
         } else
         {
-            Serial.print(F("COMMAND HANDLER NOT SPECIFIED"));
+            debug(F("COMMAND HANDLER NOT SPECIFIED"));
         }
     }
 }
