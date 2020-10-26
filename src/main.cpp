@@ -196,10 +196,11 @@ void loop()
         debug(F("STATE "));
         debug(AutofloodController::StateToString(state));
         debug(F(" PERIOD "));
-        debug(AutofloodController::PrettyPrintDuration(periodSec * 1000UL));
+        AutofloodController::DebugPrintDuration(periodSec * 1000UL);
         debug(F(" DURATION "));
-        debug(AutofloodController::PrettyPrintDuration(durationMs));
+        AutofloodController::DebugPrintDuration(durationMs);
         debug(F(" NEXT ACTIVATION "));
-        debugln(AutofloodController::PrettyPrintDuration(nextActivationMs));
+        AutofloodController::DebugPrintDuration(nextActivationMs);
+        debugln();
     }
 }

@@ -59,6 +59,6 @@ public:
     void HandleElapsed(unsigned long elapsedMs);
 
     static const char * StateToString(AutofloodState state);
-    static String PrettyPrintDuration(unsigned long durationMs);
+    static void DebugPrintDuration(unsigned long durationMs);
 };
 #endif /* AUTOFLOODCONTROLLER */

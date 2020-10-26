@@ -16,7 +16,8 @@ AutofloodController::AutofloodController(PumpControlFn pumpControlFn)
 void AutofloodController::SetPeriod(unsigned long periodSeconds)
 {
     debug(F("Updating pump period "));
-    debugln(AutofloodController::PrettyPrintDuration(periodSeconds * 1000));
+    AutofloodController::DebugPrintDuration(periodSeconds * 1000);
+    debugln();
 
     _periodSeconds = periodSeconds;
 }
@@ -29,7 +30,8 @@ unsigned long AutofloodController::GetPeriodSeconds()
 void AutofloodController::SetPumpDuration(unsigned long pumpDurationMs)
 {
     debug(F("Updating pump duration "));
-    debugln(AutofloodController::PrettyPrintDuration(pumpDurationMs));
+    AutofloodController::DebugPrintDuration(pumpDurationMs);
+    debugln();
 
     _pumpDurationMs = pumpDurationMs;
 }
@@ -42,7 +44,8 @@ unsigned long AutofloodController::GetPumpDurationMs()
 void AutofloodController::SetNextActivation(unsigned long nextActivationMs)
 {
     debug(F("Updating next activation time "));
-    debugln(AutofloodController::PrettyPrintDuration(nextActivationMs));
+    AutofloodController::DebugPrintDuration(nextActivationMs);
+    debugln();
 
     _nextActivationMs = nextActivationMs;
 }
@@ -162,40 +165,38 @@ const char * AutofloodController::StateToString(AutofloodState state)
     return "???";
 }
 
-// TODO: Find a way to switch to c strings
-String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
+void AutofloodController::DebugPrintDuration(unsigned long durationMs)
 {
     if (durationMs < 1000)
     {
-        String result = String(durationMs);
-        result += F(" ms");
-        return result;
+        debug(durationMs);
+        debug(F(" ms"));
+        return;
     }
 
     unsigned long durationSeconds = durationMs / 1000;
 
     if (durationSeconds < 60)
     {
-        String result = String(durationSeconds);
-        result += F(" sec");
-        return result;
+        debug(durationSeconds);
+        debug(F(" s"));
+        return;
     }
 
     unsigned long durationMinutes = durationSeconds / 60;
 
     if (durationMinutes < 60)
     {
-        String result = String(durationMinutes);
-        result += F(" minutes");
-        return result;
+        debug(durationMinutes);
+        debug(F(" m"));
+        return;
     }
 
     unsigned long durationHours = durationMinutes / 60;
     unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
 
-    String result = String(durationHours);
-    result += F(" hours ");
-    result += leftOverMinutes;
-    result += F(" minutes");
-    return result;
+    debug(durationHours);
+    debug(F(" h "));
+    debug(leftOverMinutes);
+    debug(F(" m"));
 }
