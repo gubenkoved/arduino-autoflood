@@ -15,6 +15,7 @@ AutofloodController *autofloodController = NULL;
 unsigned long lastTime;
 const int buttonPin = 2;
 const int pumpPin = 12;
+const int ledPin = 13;
 
 void onButtonShortPress()
 {
@@ -95,10 +96,12 @@ void onPumpControlMessage(PumpControlMessage message)
     if (message == PumpControlMessage::Open)
     {
         digitalWrite(pumpPin, HIGH);
+        digitalWrite(ledPin, HIGH);
     }
     else if (message == PumpControlMessage::Close)
     {
         digitalWrite(pumpPin, LOW);
+        digitalWrite(ledPin, LOW);
     }
 }
 
@@ -116,6 +119,7 @@ void setup()
 
     pinMode(buttonPin, INPUT);
     pinMode(pumpPin, OUTPUT);
+    pinMode(ledPin, OUTPUT);
 
     MenuItem *periodMenuItems[] = {
         new CommandMenuItem(1, "+ 1h"),
