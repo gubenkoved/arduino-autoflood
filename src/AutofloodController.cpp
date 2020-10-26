@@ -150,17 +150,18 @@ void AutofloodController::HandleElapsed(unsigned long elapsedMs)
 }
 
 // static methods
-String AutofloodController::StateToString(AutofloodState state)
+const char * AutofloodController::StateToString(AutofloodState state)
 {
     if (state == AutofloodState::Waiting)
-        return F("WAITING");
+        return "WAITING";
 
     if (state == AutofloodState::Flooding)
-        return F("FLOODING");
+        return "FLOODING";
 
-    return String(state);
+    return "???";
 }
 
+// TODO: Find a way to switch to c strings
 String AutofloodController::PrettyPrintDuration(unsigned long durationMs)
 {
     if (durationMs < 1000)

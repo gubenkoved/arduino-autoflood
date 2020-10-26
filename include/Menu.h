@@ -11,10 +11,10 @@ enum MenuItemType
 class MenuItem
 {
 private:
-    String _name;
+    const char * _name;
 public:
-    MenuItem(String name);
-    const String &GetName() const;
+    MenuItem(const char * name);
+    const char * GetName() const;
     virtual MenuItemType GetType() const = 0;
 };
 
@@ -32,7 +32,7 @@ private:
     int _count;
 
 public:
-    SubMenuMenuItem(String name, MenuItem *items[], int count);
+    SubMenuMenuItem(const char * name, MenuItem *items[], int count);
     int Count() const;
     MenuItem **GetItems() const;
     MenuItemType GetType() const;
@@ -46,7 +46,7 @@ private:
     int _commandId;
 
 public:
-    CommandMenuItem(int id, String name);
+    CommandMenuItem(int id, const char *name);
     int CommandId() const;
     MenuItemType GetType() const;
 };

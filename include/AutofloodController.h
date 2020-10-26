@@ -59,7 +59,7 @@ public:
     // caller must provide how many time elapsed to perform time-based activities
     void HandleElapsed(unsigned long elapsedMs);
 
-    static String StateToString(AutofloodState state);
+    static const char * StateToString(AutofloodState state);
     static String PrettyPrintDuration(unsigned long durationMs);
 };
 #endif /* AUTOFLOODCONTROLLER */

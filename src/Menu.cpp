@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <Menu.h>
 
-MenuItem::MenuItem(String name)
+MenuItem::MenuItem(const char *name)
 {
     _name = name;
 }
 
-const String &MenuItem::GetName() const
+const char *MenuItem::GetName() const
 {
     return _name;
 }
@@ -14,7 +14,7 @@ const String &MenuItem::GetName() const
 // *****************************************************************************
 
 GoBackMenuItem::GoBackMenuItem()
-    : MenuItem(F("<back>"))
+    : MenuItem("<back>")
 {
 }
 
@@ -25,7 +25,7 @@ MenuItemType GoBackMenuItem::GetType() const
 
 // *****************************************************************************
 
-SubMenuMenuItem::SubMenuMenuItem(String name, MenuItem *items[], int count)
+SubMenuMenuItem::SubMenuMenuItem(const char *name, MenuItem *items[], int count)
     : MenuItem(name)
 {
     _items = items;
@@ -64,7 +64,7 @@ MenuItem *SubMenuMenuItem::GetByIndex(int idx) const
 
 // *****************************************************************************
 
-CommandMenuItem::CommandMenuItem(int id, String name)
+CommandMenuItem::CommandMenuItem(int id, const char *name)
     : MenuItem(name)
 {
     _commandId = id;

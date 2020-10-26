@@ -58,10 +58,8 @@ void onCommand(int commandId)
     }
     else if (commandId == 30) // test flood
     {
-        outputStates[3] = outputStates[3] == HIGH ? LOW : HIGH;
-        digitalWrite(3, outputStates[3]);
-        Serial.print("STATE ");
-        Serial.println(outputStates[3]);
+        // flood in 5 seconds!
+        autofloodController->SetNextActivation(5000);
     }
     else if (commandId == 99) // factory reset
     {
@@ -100,21 +98,21 @@ void setup()
     pinMode(13, OUTPUT);
 
     MenuItem *periodMenuItems[] = {
-        new CommandMenuItem(1, F("+")),
-        new CommandMenuItem(2, F("-")),
+        new CommandMenuItem(1, "+"),
+        new CommandMenuItem(2, "-"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *periodMenu = new SubMenuMenuItem(F("period (hours)"), periodMenuItems, 3);
+    SubMenuMenuItem *periodMenu = new SubMenuMenuItem("period (hours)", periodMenuItems, 3);
 
     MenuItem *durationMenuItems[] = {
-        new CommandMenuItem(10, F("+")),
-        new CommandMenuItem(20, F("-")),
+        new CommandMenuItem(10, "+"),
+        new CommandMenuItem(20, "-"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *durationMenu = new SubMenuMenuItem(F("duration (seconds)"), durationMenuItems, 3);
+    SubMenuMenuItem *durationMenu = new SubMenuMenuItem("duration (seconds)", durationMenuItems, 3);
 
-    MenuItem *factoryResetCommand = new CommandMenuItem(99, F("factory reset"));
-    MenuItem *testFloodingCommand = new CommandMenuItem(30, F("test flooding"));
+    MenuItem *factoryResetCommand = new CommandMenuItem(99, "factory reset");
+    MenuItem *testFloodingCommand = new CommandMenuItem(30, "test flooding");
 
     MenuItem *rootItems[] =
         {
@@ -124,7 +122,7 @@ void setup()
             factoryResetCommand,
         };
 
-    SubMenuMenuItem *root = new SubMenuMenuItem(F("root"), rootItems, 4);
+    SubMenuMenuItem *root = new SubMenuMenuItem("root", rootItems, 4);
 
     menu = new Menu(root, onCommand);
 
