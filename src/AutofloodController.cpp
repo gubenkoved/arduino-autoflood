@@ -171,7 +171,7 @@ void AutofloodController::DebugPrintDuration(unsigned long durationMs)
     if (durationMs < 1000)
     {
         debug(durationMs);
-        debug(F(" ms"));
+        debug(F("ms"));
         return;
     }
 
@@ -179,8 +179,17 @@ void AutofloodController::DebugPrintDuration(unsigned long durationMs)
 
     if (durationSeconds < 60)
     {
+        unsigned long leftoverMs = durationMs - durationSeconds * 1000;
+
         debug(durationSeconds);
-        debug(F(" s"));
+        debug(F("s"));
+
+        if (leftoverMs != 0)
+        {
+            debug(" ");
+            debug(leftoverMs);
+            debug(F("ms"));
+        }
         return;
     }
 
@@ -188,8 +197,12 @@ void AutofloodController::DebugPrintDuration(unsigned long durationMs)
 
     if (durationMinutes < 60)
     {
+        unsigned long leftoverSeconds = durationSeconds - durationMinutes * 60;
+
         debug(durationMinutes);
-        debug(F(" m"));
+        debug(F("m "));
+        debug(leftoverSeconds);
+        debug(F("s"));
         return;
     }
 
