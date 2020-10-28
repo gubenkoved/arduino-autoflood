@@ -132,11 +132,12 @@ void AutofloodController::HandleElapsed(unsigned long elapsedMs)
     }
     else // flooding!
     {
-        _floodTimerMs -= elapsedMs;
-
-        if (_floodTimerMs <= 0)
+        if (_floodTimerMs > elapsedMs)
         {
-            // shut the pump off!
+            _floodTimerMs -= elapsedMs;
+        }
+        else // shut the pump off!
+        {
             _state = AutofloodState::Waiting;
             _pumpControlFn(PumpControlMessage::Close);
         }

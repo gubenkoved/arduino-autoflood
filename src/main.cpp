@@ -182,6 +182,15 @@ void loop()
     unsigned long currentTime = millis();
     unsigned long elapsedMs = currentTime - lastTime;
 
+    // limit the frequency of reaction, discard too fast cycles to improve accuracy
+    if (elapsedMs <= 3)
+    {
+        delay(1);
+        return;
+    }
+
+    // debugln(elapsedMs);
+
     lastTime = currentTime;
 
     smartButton->loop();
