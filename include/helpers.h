@@ -27,6 +27,6 @@ void diag();
 // it never works for arrays passed to function as it "decays" into the pointer
 // to the first element;
 // https://stackoverflow.com/questions/3368883/how-does-this-size-of-array-template-function-work
-template <typename T, int size> int ARRAY_SIZE(T (&)[size]) { return size; }
+template <typename T, int size> int ARRAY_SIZE(T (&array)[size]) { return size; }
 
 #endif /* INCLUDE_HELPERS */

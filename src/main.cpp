@@ -72,7 +72,8 @@ void onCommand(int commandId)
         if (currentDurationMs > 500)
         {
             autofloodController->SetPumpDuration(currentDurationMs - 500);
-        } else
+        }
+        else
         {
             debugln(F("unable to decrease the duration more!"));
         }
@@ -81,7 +82,8 @@ void onCommand(int commandId)
     {
         // flood in 5 seconds!
         autofloodController->SetNextActivation(5000);
-    } else if (commandId == 40) // reset timer
+    }
+    else if (commandId == 40) // reset timer
     {
         autofloodController->SetNextActivation(currentPeriodSeconds * 1000UL);
     }
@@ -132,16 +134,14 @@ void setup()
         new CommandMenuItem(6, "1/2"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *periodMenu = new SubMenuMenuItem(
-        "period", periodMenuItems, ARRAY_SIZE(periodMenuItems));
+    SubMenuMenuItem *periodMenu = SubMenuMenuItem::Create("period", periodMenuItems);
 
     MenuItem *durationMenuItems[] = {
         new CommandMenuItem(10, "+ 0.5s"),
         new CommandMenuItem(11, "- 0.5s"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *durationMenu = new SubMenuMenuItem(
-        "duration", durationMenuItems, ARRAY_SIZE(durationMenuItems));
+    SubMenuMenuItem *durationMenu = SubMenuMenuItem::Create("duration", durationMenuItems);
 
     MenuItem *floodNowCommand = new CommandMenuItem(30, "flood now");
     MenuItem *resetTimerCommand = new CommandMenuItem(40, "reset timer");
@@ -156,8 +156,7 @@ void setup()
             factoryResetCommand,
         };
 
-    SubMenuMenuItem *root = new SubMenuMenuItem(
-        "root", rootItems, ARRAY_SIZE(rootItems));
+    SubMenuMenuItem *root = SubMenuMenuItem::Create("root", rootItems);
 
     menu = new Menu(root, onCommand);
 

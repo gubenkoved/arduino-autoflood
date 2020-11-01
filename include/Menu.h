@@ -11,10 +11,11 @@ enum MenuItemType
 class MenuItem
 {
 private:
-    const char * _name;
+    const char *_name;
+
 public:
-    MenuItem(const char * name);
-    const char * GetName() const;
+    MenuItem(const char *name);
+    const char *GetName() const;
     virtual MenuItemType GetType() const = 0;
 };
 
@@ -32,12 +33,18 @@ private:
     int _count;
 
 public:
-    SubMenuMenuItem(const char * name, MenuItem *items[], int count);
+    SubMenuMenuItem(const char *name, MenuItem *items[], int count);
     int Count() const;
     MenuItem **GetItems() const;
     MenuItemType GetType() const;
     int IndexOf(MenuItem *item) const;
     MenuItem *GetByIndex(int idx) const;
+
+    template <int size>
+    static SubMenuMenuItem *Create(const char *name, MenuItem *(&items)[size])
+    {
+        return new SubMenuMenuItem(name, items, size);
+    }
 };
 
 class CommandMenuItem : public MenuItem
@@ -57,9 +64,10 @@ private:
     SubMenuMenuItem *_root;
     int _level;
     MenuItem **_selection;
-    void(*_onCommand)(int);
+    void (*_onCommand)(int);
+
 public:
-    Menu(SubMenuMenuItem *rootSubmenu, void(*onCommand)(int) = NULL, int maxLevel = 5);
+    Menu(SubMenuMenuItem *rootSubmenu, void (*onCommand)(int) = NULL, int maxLevel = 5);
     ~Menu();
     void Next();
     void Exec();
