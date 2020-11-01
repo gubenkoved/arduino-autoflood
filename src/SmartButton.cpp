@@ -10,10 +10,8 @@ SmartButton::SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)(),
     _onShortPress = onShortPress;
     _onLongPress = onLongPress;
     _longPressThresholdMs = longPressThresholdMs;
-}
 
-void SmartButton::setup()
-{
+    // adjust the PIN mode
     pinMode(_pin, INPUT);
 }
 

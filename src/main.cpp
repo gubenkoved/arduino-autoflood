@@ -32,7 +32,7 @@ void onButtonLongPress()
 // showcase the commands!
 void onCommand(int commandId)
 {
-    debug("EXECUTE COMMAND ID=");
+    debug(F("EXECUTE COMMAND ID="));
     debugln(commandId);
 
     unsigned long currentPeriodSeconds = autofloodController->GetPeriodSeconds();
@@ -81,6 +81,9 @@ void onCommand(int commandId)
     {
         // flood in 5 seconds!
         autofloodController->SetNextActivation(5000);
+    } else if (commandId == 40) // reset timer
+    {
+        autofloodController->SetNextActivation(currentPeriodSeconds * 1000UL);
     }
     else if (commandId == 99) // factory reset
     {
@@ -90,7 +93,7 @@ void onCommand(int commandId)
 
 void onPumpControlMessage(PumpControlMessage message)
 {
-    debug("PUMP CONTROLL MESSAGE: ");
+    debug(F("PUMP CONTROLL MESSAGE: "));
     debugln(message);
 
     if (message == PumpControlMessage::Open)
@@ -115,9 +118,8 @@ void setup()
     }
 
     debugln(F("AUTOFLOOD :: BOOTING UP"));
-    debugln("DEBUGGING MODE!");
+    debugln(F("DEBUGGING MODE!"));
 
-    pinMode(buttonPin, INPUT);
     pinMode(pumpPin, OUTPUT);
     pinMode(ledPin, OUTPUT);
 
@@ -130,33 +132,39 @@ void setup()
         new CommandMenuItem(6, "1/2"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *periodMenu = new SubMenuMenuItem("period", periodMenuItems, 7);
+    SubMenuMenuItem *periodMenu = new SubMenuMenuItem(
+        "period", periodMenuItems, ARRAY_SIZE(periodMenuItems));
 
     MenuItem *durationMenuItems[] = {
         new CommandMenuItem(10, "+ 0.5s"),
         new CommandMenuItem(11, "- 0.5s"),
         new GoBackMenuItem()};
 
-    SubMenuMenuItem *durationMenu = new SubMenuMenuItem("duration (seconds)", durationMenuItems, 3);
+    SubMenuMenuItem *durationMenu = new SubMenuMenuItem(
+        "duration", durationMenuItems, ARRAY_SIZE(durationMenuItems));
 
+    MenuItem *floodNowCommand = new CommandMenuItem(30, "flood now");
+    MenuItem *resetTimerCommand = new CommandMenuItem(40, "reset timer");
     MenuItem *factoryResetCommand = new CommandMenuItem(99, "factory reset");
-    MenuItem *testFloodingCommand = new CommandMenuItem(30, "test flooding");
 
     MenuItem *rootItems[] =
         {
             periodMenu,
             durationMenu,
-            testFloodingCommand,
+            floodNowCommand,
+            resetTimerCommand,
             factoryResetCommand,
         };
 
-    SubMenuMenuItem *root = new SubMenuMenuItem("root", rootItems, 4);
+    SubMenuMenuItem *root = new SubMenuMenuItem(
+        "root", rootItems, ARRAY_SIZE(rootItems));
 
     menu = new Menu(root, onCommand);
 
     //renderer = new FullDebugMenuRenderer(menu);
     renderer = new SimpleDebugMenuRenderer(menu);
 
+    // note that SmartButton will automatically adjust the PIN mode to INPUT
     smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress, LONG_PRESS_THRESHOLD);
 
     diag();
@@ -164,10 +172,6 @@ void setup()
     renderer->Render();
 
     autofloodController = new AutofloodController(onPumpControlMessage);
-
-    autofloodController->SetPeriod(10UL);
-    autofloodController->SetPumpDuration(1000UL);
-    autofloodController->SetNextActivation(10000UL);
 
     // load the stored settings
     autofloodController->LoadFromMemory();
@@ -182,21 +186,24 @@ void loop()
     unsigned long currentTime = millis();
     unsigned long elapsedMs = currentTime - lastTime;
 
-    // limit the frequency of reaction, discard too fast cycles to improve accuracy
-    if (elapsedMs <= 3)
+    // note that even that we operate on small (in ms) integer durations
+    // and Flood Controller uses that to count the time it still provides very
+    // good accuracy (in my tests the skew was in order of seconds for the whole
+    // day) because the millis() func seem to rely on a higher resolution timer
+    // and so the diff between real elapsed time and out integer approximation
+    // do not add up (!), but rather compensate each other
+    if (elapsedMs == 0)
     {
         delay(1);
         return;
     }
-
-    // debugln(elapsedMs);
 
     lastTime = currentTime;
 
     smartButton->loop();
     autofloodController->HandleElapsed(elapsedMs);
 
-    if (currentTime - lastStatTime > DEBUG_STATE_REPORT_INTERVAL_SECONDS * 1000UL)
+    if (currentTime - lastStatTime >= DEBUG_STATE_REPORT_INTERVAL_MS)
     {
         lastStatTime = currentTime;
 

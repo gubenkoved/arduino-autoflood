@@ -111,13 +111,7 @@ void Menu::Next()
     int curIdx = container->IndexOf(selected);
     int nextIdx = (curIdx + 1) % n;
 
-    // debug("NEXT IDX: ");
-    // debugln(nextIdx);
-
     _selection[_level] = container->GetByIndex(nextIdx);
-
-    // debug("SELECTION: ");
-    // debugln(_selection[_level]->GetName());
 }
 
 void Menu::Exec()

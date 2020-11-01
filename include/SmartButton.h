@@ -13,7 +13,6 @@ private:
     unsigned long _pressedAt = 0;
 public:
     SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)() = NULL, unsigned int longPressThresholdMs = 600U);
-    void setup();
     void loop();
 };
 #endif /* INCLUDE_SMARTBUTTON */

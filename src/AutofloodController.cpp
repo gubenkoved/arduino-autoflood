@@ -5,10 +5,9 @@
 AutofloodController::AutofloodController(PumpControlFn pumpControlFn)
 {
     _pumpControlFn = pumpControlFn;
-    // load the defaults
-    _periodSeconds = 24UL * 60UL * 60UL;       // every day
-    _pumpDurationMs = 2000UL;                  // two seconds
-    _nextActivationMs = _periodSeconds * 1000; // start with the original period to be safe
+    _periodSeconds = DEFAULT_FLOOD_PERIOD_SEC;
+    _pumpDurationMs = DEFAULT_FLOOD_DURATION_MS;
+    _nextActivationMs = _periodSeconds * 1000;
     _state = AutofloodState::Waiting;
     _lastAutoSaveTime = millis();
 }
@@ -103,9 +102,9 @@ void AutofloodController::FactoryReset()
 {
     debugln(F("Factory reset..."));
 
-    _periodSeconds = 60UL * 60UL * 24UL;       // every day
-    _pumpDurationMs = 2000UL;                  // two seconds
-    _nextActivationMs = _periodSeconds * 1000; // start next day
+    _periodSeconds = DEFAULT_FLOOD_PERIOD_SEC;
+    _pumpDurationMs = DEFAULT_FLOOD_DURATION_MS;
+    _nextActivationMs = _periodSeconds * 1000;
     _state = AutofloodState::Waiting;
 
     // save the settings to the EEPROM
@@ -126,7 +125,7 @@ void AutofloodController::HandleElapsed(unsigned long elapsedMs)
         {
             _state = AutofloodState::Flooding;
             _pumpControlFn(PumpControlMessage::Open);
-            _nextActivationMs = _periodSeconds * 1000;
+            _nextActivationMs = _periodSeconds * 1000UL;
             _floodTimerMs = _pumpDurationMs;
         }
     }
@@ -148,7 +147,7 @@ void AutofloodController::HandleElapsed(unsigned long elapsedMs)
     // autosave logic
     if ((currentTime - _lastAutoSaveTime) > AUTOSAVE_INTERVAL_SECONDS * 1000UL)
     {
-        debugln("Triggering auto save...");
+        debugln(F("Triggering auto save..."));
         SaveToMemory();
         _lastAutoSaveTime = currentTime;
     }
@@ -168,36 +167,36 @@ const char * AutofloodController::StateToString(AutofloodState state)
 
 void AutofloodController::DebugPrintDuration(unsigned long durationMs)
 {
-    if (durationMs < 1000)
+    if (durationMs < 1000UL)
     {
         debug(durationMs);
         debug(F("ms"));
         return;
     }
 
-    unsigned long durationSeconds = durationMs / 1000;
+    unsigned long durationSeconds = durationMs / 1000UL;
 
-    if (durationSeconds < 60)
+    if (durationSeconds < 60UL)
     {
-        unsigned long leftoverMs = durationMs - durationSeconds * 1000;
+        unsigned long leftoverMs = durationMs - durationSeconds * 1000UL;
 
         debug(durationSeconds);
         debug(F("s"));
 
         if (leftoverMs != 0)
         {
-            debug(" ");
+            debug(F(" "));
             debug(leftoverMs);
             debug(F("ms"));
         }
         return;
     }
 
-    unsigned long durationMinutes = durationSeconds / 60;
+    unsigned long durationMinutes = durationSeconds / 60UL;
 
-    if (durationMinutes < 60)
+    if (durationMinutes < 60UL)
     {
-        unsigned long leftoverSeconds = durationSeconds - durationMinutes * 60;
+        unsigned long leftoverSeconds = durationSeconds - durationMinutes * 60UL;
 
         debug(durationMinutes);
         debug(F("m "));
@@ -206,7 +205,7 @@ void AutofloodController::DebugPrintDuration(unsigned long durationMs)
         return;
     }
 
-    unsigned long durationHours = durationMinutes / 60;
+    unsigned long durationHours = durationMinutes / 60UL;
     unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
 
     debug(durationHours);
