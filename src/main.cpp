@@ -4,6 +4,7 @@
 #include <SmartButton.h>
 #include <MenuRenderer.h>
 #include <AutofloodController.h>
+#include <ApplicationStateController.h>
 #include <SSD1306Renderer.h>
 
 // http://paulmurraycbr.github.io/ArduinoTheOOWay.html
@@ -12,22 +13,34 @@ Menu *menu = NULL;
 MenuRenderer *renderer = NULL;
 SmartButton *smartButton = NULL;
 AutofloodController *autofloodController = NULL;
+ApplicationStateController *appStateController = NULL;
 
 unsigned long lastTime;
 const int buttonPin = 2;
 const int pumpPin = 12;
 const int ledPin = 13;
 
+
 void onButtonShortPress()
 {
-    menu->Next();
+    ApplicationState appState = appStateController->GetState();
+
+    if (appState == ApplicationState::Active)
+        menu->Next();
+
     renderer->Render();
+    appStateController->MarkUserActive();
 }
 
 void onButtonLongPress()
 {
-    menu->Exec();
+    ApplicationState appState = appStateController->GetState();
+
+    if (appState == ApplicationState::Active)
+        menu->Exec();
+
     renderer->Render();
+    appStateController->MarkUserActive();
 }
 
 // showcase the commands!
@@ -177,6 +190,8 @@ void setup()
     // load the stored settings
     autofloodController->LoadFromMemory();
 
+    appStateController = new ApplicationStateController(renderer, IDLE_TIMEOUT_MS);
+
     lastTime = millis();
 }
 
@@ -201,8 +216,10 @@ void loop()
 
     lastTime = currentTime;
 
+    // let dependencies handle the elapsed time
     smartButton->loop();
     autofloodController->HandleElapsed(elapsedMs);
+    appStateController->HandleElapsed(elapsedMs);
 
     if (currentTime - lastStatTime >= DEBUG_STATE_REPORT_INTERVAL_MS)
     {
@@ -214,7 +231,11 @@ void loop()
         unsigned long durationMs = autofloodController->GetPumpDurationMs();
         unsigned long nextActivationMs = autofloodController->GetNextActivationMs();
 
-        debug(F("STATE "));
+        ApplicationState appState = appStateController->GetState();
+
+        debug(F("APP STATE "));
+        debug(ApplicationStateController::StateToString(appState));
+        debug(F(" FLOOD STATE "));
         debug(AutofloodController::StateToString(state));
         debug(F(" PERIOD "));
         AutofloodController::DebugPrintDuration(periodSec * 1000UL);

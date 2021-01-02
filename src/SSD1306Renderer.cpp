@@ -68,3 +68,9 @@ void SSD1306Renderer::Render()
     // show the buffer
     _display.display();
 }
+
+void SSD1306Renderer::Clean()
+{
+    _display.clearDisplay();
+    _display.display();
+}

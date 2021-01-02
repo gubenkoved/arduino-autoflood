@@ -11,6 +11,7 @@ class SSD1306Renderer : public MenuRenderer
     public:
         SSD1306Renderer(Menu *menu);
         void Render();
+        void Clean();
 };
 
 #endif

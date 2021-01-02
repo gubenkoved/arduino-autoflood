@@ -11,6 +11,10 @@ protected:
 public:
     MenuRenderer(Menu *menu);
     virtual void Render() = 0;
+    virtual void Clean()
+    {
+        // no-op by default
+    }
 };
 
 class FullDebugMenuRenderer : public MenuRenderer
