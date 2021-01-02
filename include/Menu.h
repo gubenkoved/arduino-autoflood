@@ -1,6 +1,8 @@
 #ifndef INCLUDE_MENU
 #define INCLUDE_MENU
 
+#include <stddef.h>
+
 enum MenuItemType
 {
     SubMenu = 0,

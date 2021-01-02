@@ -4,6 +4,7 @@
 #include <SmartButton.h>
 #include <MenuRenderer.h>
 #include <AutofloodController.h>
+#include <SSD1306Renderer.h>
 
 // http://paulmurraycbr.github.io/ArduinoTheOOWay.html
 
@@ -160,8 +161,9 @@ void setup()
 
     menu = new Menu(root, onCommand);
 
-    //renderer = new FullDebugMenuRenderer(menu);
-    renderer = new SimpleDebugMenuRenderer(menu);
+    // renderer = new FullDebugMenuRenderer(menu);
+    // renderer = new SimpleDebugMenuRenderer(menu);
+    renderer = new SSD1306Renderer(menu);
 
     // note that SmartButton will automatically adjust the PIN mode to INPUT
     smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress, LONG_PRESS_THRESHOLD);
