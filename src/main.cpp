@@ -2,7 +2,7 @@
 #include <helpers.h>
 #include <Menu.h>
 #include <SmartButton.h>
-#include <MenuRenderer.h>
+#include <Renderer.h>
 #include <AutofloodController.h>
 #include <ApplicationStateController.h>
 #include <SSD1306Renderer.h>
@@ -10,7 +10,7 @@
 // http://paulmurraycbr.github.io/ArduinoTheOOWay.html
 
 Menu *menu = NULL;
-MenuRenderer *renderer = NULL;
+Renderer *renderer = NULL;
 SmartButton *smartButton = NULL;
 AutofloodController *autofloodController = NULL;
 ApplicationStateController *appStateController = NULL;
@@ -20,26 +20,50 @@ const int buttonPin = 2;
 const int pumpPin = 12;
 const int ledPin = 13;
 
+void renderState()
+{
+    unsigned long periodSec = autofloodController->GetPeriodSeconds();
+    unsigned long durationMs = autofloodController->GetPumpDurationMs();
+    unsigned long nextActivationMs = autofloodController->GetNextActivationMs();
+    renderer->RenderState(nextActivationMs, durationMs, periodSec * 1000UL);
+}
 
 void onButtonShortPress()
 {
-    ApplicationState appState = appStateController->GetState();
-
-    if (appState == ApplicationState::Active)
-        menu->Next();
-
-    renderer->Render();
+    ApplicationState state = appStateController->GetState();
     appStateController->MarkUserActive();
+
+    if (state == ApplicationState::Configuration)
+    {
+        menu->Next();
+        renderer->RenderMenu();
+    } else // should be Active state there
+    {
+        // render the current state
+        renderState();
+    }
 }
 
 void onButtonLongPress()
 {
     ApplicationState appState = appStateController->GetState();
 
-    if (appState == ApplicationState::Active)
+    if (appState != ApplicationState::Configuration)
+    {
+        // enter the configuration state by long press
+        appStateController->EnterConfigurationMode();
+    } else // ApplicationState::Configuration
+    {
         menu->Exec();
+    }
 
-    renderer->Render();
+    // execution of the command may exit the config mode, so rerender
+    // the menu if we still in config mode
+    appState = appStateController->GetState();
+
+    if (appState == ApplicationState::Configuration)
+        renderer->RenderMenu();
+
     appStateController->MarkUserActive();
 }
 
@@ -101,6 +125,11 @@ void onCommand(int commandId)
     {
         autofloodController->SetNextActivation(currentPeriodSeconds * 1000UL);
     }
+    else if (commandId == 50) // exit
+    {
+        appStateController->ExitConfigurationMode();
+        renderState();
+    }
     else if (commandId == 99) // factory reset
     {
         autofloodController->FactoryReset();
@@ -160,6 +189,7 @@ void setup()
     MenuItem *floodNowCommand = new CommandMenuItem(30, "flood now");
     MenuItem *resetTimerCommand = new CommandMenuItem(40, "reset timer");
     MenuItem *factoryResetCommand = new CommandMenuItem(99, "factory reset");
+    MenuItem *exitCommand = new CommandMenuItem(50, "<exit>");
 
     MenuItem *rootItems[] =
         {
@@ -168,22 +198,21 @@ void setup()
             floodNowCommand,
             resetTimerCommand,
             factoryResetCommand,
+            exitCommand,
         };
 
     SubMenuMenuItem *root = SubMenuMenuItem::Create("root", rootItems);
 
     menu = new Menu(root, onCommand);
 
-    // renderer = new FullDebugMenuRenderer(menu);
-    // renderer = new SimpleDebugMenuRenderer(menu);
+    // renderer = new FullDebugRenderer(menu);
+    // renderer = new SimpleDebugRenderer(menu);
     renderer = new SSD1306Renderer(menu);
 
     // note that SmartButton will automatically adjust the PIN mode to INPUT
     smartButton = new SmartButton(buttonPin, onButtonShortPress, onButtonLongPress, LONG_PRESS_THRESHOLD);
 
     diag();
-
-    renderer->Render();
 
     autofloodController = new AutofloodController(onPumpControlMessage);
 
@@ -193,6 +222,8 @@ void setup()
     appStateController = new ApplicationStateController(renderer, IDLE_TIMEOUT_MS);
 
     lastTime = millis();
+
+    renderState();
 }
 
 unsigned long lastStatTime = 0;

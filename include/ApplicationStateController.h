@@ -1,7 +1,7 @@
 #ifndef ApplicationStateController_H
 #define ApplicationStateController_H
 
-#include <MenuRenderer.h>
+#include <Renderer.h>
 #include <Arduino.h>
 
 enum ApplicationState
@@ -10,20 +10,23 @@ enum ApplicationState
     // user interfaces are off, and interaction causes state transition
     Idle = 0,
     Active = 1,
+    Configuration = 2,
 };
 
+// TODO: Responsibilities separation between main.cpp and this controller are
+//  obscure and intersecting; consider moerging the logic (maybe even move all to main.cpp)
 class ApplicationStateController
 {
     private:
         ApplicationState _state;
         unsigned long _idleTimeoutMs;
         unsigned long _lastActivityTimer; // time in ms since last user interaction
-        MenuRenderer *_menuRenderer;
+        Renderer *_renderer;
 
     public:
-        ApplicationStateController(MenuRenderer *menuRenderer, unsigned long idleTimeoutMs = 5000)
+        ApplicationStateController(Renderer *menuRenderer, unsigned long idleTimeoutMs = 5000)
         {
-            _menuRenderer = menuRenderer;
+            _renderer = menuRenderer;
 
             // assume active state at initialization
             _state = ApplicationState::Active;
@@ -37,23 +40,32 @@ class ApplicationStateController
 
             if (_lastActivityTimer > _idleTimeoutMs)
             {
-                if (_state == ApplicationState::Active)
-                {
-                    // state transition to Idle, turn off the display
-                    _menuRenderer->Clean();
-                }
+                // state transition to Idle, turn off the display
+                if (_state != ApplicationState::Idle)
+                    _renderer->Clean();
 
                 _state = ApplicationState::Idle;
-            }
-            else
-            {
-                _state = ApplicationState::Active;
             }
         }
 
         void MarkUserActive()
         {
+            if (_state == ApplicationState::Idle)
+                _state = ApplicationState::Active;
+
             _lastActivityTimer = 0;
+        }
+
+        void EnterConfigurationMode()
+        {
+            _lastActivityTimer = 0;
+            _state = ApplicationState::Configuration;
+        }
+
+        void ExitConfigurationMode()
+        {
+            _lastActivityTimer = 0;
+            _state = ApplicationState::Active;
         }
 
         ApplicationState GetState()
@@ -69,7 +81,11 @@ class ApplicationStateController
             if (state == ApplicationState::Idle)
                 return "IDLE";
 
+            if (state == ApplicationState::Configuration)
+                return "CONFIG";
+
             return "???";
         }
 };
-#endif /* ApplicationStateController_H */
+
+#endif

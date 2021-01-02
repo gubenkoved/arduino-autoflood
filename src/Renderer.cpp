@@ -1,18 +1,18 @@
-#include <MenuRenderer.h>
+#include <Renderer.h>
 #include <helpers.h>
 
-MenuRenderer::MenuRenderer(Menu *menu)
+Renderer::Renderer(Menu *menu)
 {
     _menu = menu;
 }
 
-void FullDebugMenuRenderer::PrintSpaces(int n)
+void FullDebugRenderer::PrintSpaces(int n)
 {
     for (int i = 0; i < n; i += 1)
         Serial.print(F(" "));
 }
 
-void FullDebugMenuRenderer::RenderImpl(MenuItem *item, int indent)
+void FullDebugRenderer::RenderImpl(MenuItem *item, int indent)
 {
     int type = item->GetType();
 
@@ -52,17 +52,17 @@ void FullDebugMenuRenderer::RenderImpl(MenuItem *item, int indent)
     }
 }
 
-FullDebugMenuRenderer::FullDebugMenuRenderer(Menu *menu)
-    : MenuRenderer(menu)
+FullDebugRenderer::FullDebugRenderer(Menu *menu)
+    : Renderer(menu)
 {
-    debugln(F("FullDebugMenuRenderer::ctor"));
+    debugln(F("FullDebugRenderer::ctor"));
 }
-FullDebugMenuRenderer::~FullDebugMenuRenderer()
+FullDebugRenderer::~FullDebugRenderer()
 {
-    debugln(F("~FullDebugMenuRenderer"));
+    debugln(F("~FullDebugRenderer"));
 }
 
-void FullDebugMenuRenderer::Render()
+void FullDebugRenderer::RenderMenu()
 {
     SubMenuMenuItem *item = _menu->GetRoot();
     RenderImpl(item, 0);
@@ -70,13 +70,13 @@ void FullDebugMenuRenderer::Render()
 
 // *****************************************************************************
 
-SimpleDebugMenuRenderer::SimpleDebugMenuRenderer(Menu *menu)
-    : MenuRenderer(menu)
+SimpleDebugRenderer::SimpleDebugRenderer(Menu *menu)
+    : Renderer(menu)
 {
-    debugln(F("SimpleDebugMenuRenderer::ctor"));
+    debugln(F("SimpleDebugRenderer::ctor"));
 }
 
-void SimpleDebugMenuRenderer::Render()
+void SimpleDebugRenderer::RenderMenu()
 {
     int level = _menu->GetLevel();
     MenuItem **selectionStack = _menu->GetSelectionStack();

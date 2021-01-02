@@ -1,5 +1,5 @@
 #include <Menu.h>
-#include <MenuRenderer.h>
+#include <Renderer.h>
 #include <SSD1306Renderer.h>
 #include <helpers.h>
 
@@ -18,8 +18,8 @@
 // On an arduino LEONARDO:   2(SDA),  3(SCL), ...
 #define OLED_RESET 4 // Reset pin # (or -1 if sharing Arduino reset pin)
 
-SSD1306Renderer::SSD1306Renderer(Menu* menu)
-    : MenuRenderer(menu)
+SSD1306Renderer::SSD1306Renderer(Menu *menu)
+    : Renderer(menu)
 {
     _display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -32,7 +32,7 @@ SSD1306Renderer::SSD1306Renderer(Menu* menu)
     _display.display();
 }
 
-void SSD1306Renderer::Render()
+void SSD1306Renderer::RenderMenu()
 {
     const int lines = 4;
 
@@ -56,13 +56,21 @@ void SSD1306Renderer::Render()
     for (int idx = startIdx; idx < startIdx + lines; idx += 1)
     {
         MenuItem *item = items[idx];
+        // MenuItemType itemType = item->GetType();
 
         if (item == selectionStack[level])
             _display.print(F("> "));
         else
             _display.print(F("  "));
 
-        _display.println(item->GetName());
+
+        // display the item name
+        _display.print(item->GetName());
+
+        // if (itemType == MenuItemType::SubMenu)
+        //     _display.print(F("..."));
+
+        _display.println();
     }
 
     // show the buffer
@@ -73,4 +81,95 @@ void SSD1306Renderer::Clean()
 {
     _display.clearDisplay();
     _display.display();
+}
+
+void SSD1306Renderer::RenderState(unsigned long nextActivationMs,
+                                  unsigned long durationMs,
+                                  unsigned long periodMs)
+{
+    // setup the settings
+    _display.clearDisplay();
+    _display.setTextSize(1); // default 1:1 scale
+    _display.setTextColor(SSD1306_WHITE);
+    _display.setCursor(0, 0);
+
+    // render the data
+    _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+    _display.print(F("NEXT"));
+    _display.setTextColor(SSD1306_WHITE);
+    _display.print(F("     "));
+    PrintDuration(nextActivationMs);
+    _display.println();
+
+    _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+    _display.print(F("DURATION"));
+    _display.setTextColor(SSD1306_WHITE);
+    _display.print(F(" "));
+    PrintDuration(durationMs);
+    _display.println();
+
+    _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+    _display.print(F("PERIOD"));
+    _display.setTextColor(SSD1306_WHITE);
+    _display.print(F("   "));
+    PrintDuration(periodMs);
+    _display.println();
+
+    _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+    _display.setTextColor(SSD1306_WHITE);
+    _display.println(".. long press to MENU");
+    _display.display();
+}
+
+void SSD1306Renderer::PrintDuration(unsigned long durationMs)
+{
+    if (durationMs < 1000UL)
+    {
+        _display.print(durationMs);
+        _display.print(F("ms"));
+        return;
+    }
+
+    unsigned long durationSeconds = durationMs / 1000UL;
+
+    if (durationSeconds < 60UL)
+    {
+        unsigned long leftoverMs = durationMs - durationSeconds * 1000UL;
+
+        _display.print(durationSeconds);
+        _display.print(F("s"));
+
+        if (leftoverMs != 0)
+        {
+            _display.print(F(" "));
+            _display.print(leftoverMs);
+            _display.print(F("ms"));
+        }
+        return;
+    }
+
+    unsigned long durationMinutes = durationSeconds / 60UL;
+
+    if (durationMinutes < 60UL)
+    {
+        unsigned long leftoverSeconds = durationSeconds - durationMinutes * 60UL;
+
+        _display.print(durationMinutes);
+        _display.print(F("m "));
+        _display.print(leftoverSeconds);
+        _display.print(F("s"));
+        return;
+    }
+
+    unsigned long durationHours = durationMinutes / 60UL;
+    unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
+
+    _display.print(durationHours);
+    _display.print(F("h "));
+
+    if (leftOverMinutes != 0)
+    {
+        _display.print(leftOverMinutes);
+        _display.print(F("m"));
+    }
 }
