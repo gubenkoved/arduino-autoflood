@@ -2,7 +2,7 @@
 #define OPTIONS
 
 // comment out this line to disable debug traces to Serial
-#define DEBUG_MODE
+// #define DEBUG_MODE
 
 const unsigned long LONG_PRESS_THRESHOLD = 700UL;
 const unsigned long AUTOSAVE_INTERVAL_SECONDS = 30UL;

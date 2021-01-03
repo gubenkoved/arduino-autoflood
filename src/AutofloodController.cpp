@@ -167,49 +167,35 @@ const char * AutofloodController::StateToString(AutofloodState state)
 
 void AutofloodController::DebugPrintDuration(unsigned long durationMs)
 {
-    if (durationMs < 1000UL)
+    const int maxComponentsToShow = 3;
+    int shownComponents = 0;
+    DurationComponents components = SplitDuration(durationMs);
+
+    if (components.Hours != 0)
     {
-        debug(durationMs);
-        debug(F("ms"));
-        return;
+        debug(components.Hours);
+        debug(F("h "));
+        shownComponents += 1;
     }
 
-    unsigned long durationSeconds = durationMs / 1000UL;
-
-    if (durationSeconds < 60UL)
+    if (components.Minutes != 0 && shownComponents < maxComponentsToShow)
     {
-        unsigned long leftoverMs = durationMs - durationSeconds * 1000UL;
-
-        debug(durationSeconds);
-        debug(F("s"));
-
-        if (leftoverMs != 0)
-        {
-            debug(F(" "));
-            debug(leftoverMs);
-            debug(F("ms"));
-        }
-        return;
-    }
-
-    unsigned long durationMinutes = durationSeconds / 60UL;
-
-    if (durationMinutes < 60UL)
-    {
-        unsigned long leftoverSeconds = durationSeconds - durationMinutes * 60UL;
-
-        debug(durationMinutes);
+        debug(components.Minutes);
         debug(F("m "));
-        debug(leftoverSeconds);
-        debug(F("s"));
-        return;
+        shownComponents += 1;
     }
 
-    unsigned long durationHours = durationMinutes / 60UL;
-    unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
+    if (components.Seconds != 0 && shownComponents < maxComponentsToShow)
+    {
+        debug(components.Seconds);
+        debug(F("s "));
+        shownComponents += 1;
+    }
 
-    debug(durationHours);
-    debug(F(" h "));
-    debug(leftOverMinutes);
-    debug(F(" m"));
+    if (components.Milliseconds != 0 && shownComponents < maxComponentsToShow)
+    {
+        debug(components.Milliseconds);
+        debug(F("ms"));
+        shownComponents += 1;
+    }
 }

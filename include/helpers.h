@@ -29,4 +29,22 @@ void diag();
 // https://stackoverflow.com/questions/3368883/how-does-this-size-of-array-template-function-work
 template <typename T, int size> int ARRAY_SIZE(T (&array)[size]) { return size; }
 
+struct DurationComponents
+{
+    unsigned int Milliseconds;
+    byte Seconds;
+    byte Minutes;
+    byte Hours;
+
+    DurationComponents(byte hours, byte minutes, byte seconds, unsigned int milliseconds)
+    {
+        Hours = hours;
+        Minutes = minutes;
+        Seconds = seconds;
+        Milliseconds = milliseconds;
+    }
+};
+
+DurationComponents SplitDuration(unsigned long durationMs);
+
 #endif /* INCLUDE_HELPERS */

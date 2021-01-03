@@ -98,7 +98,7 @@ void SSD1306Renderer::RenderState(unsigned long nextActivationMs,
     _display.print(F("NEXT"));
     _display.setTextColor(SSD1306_WHITE);
     _display.print(F("     "));
-    PrintDuration(nextActivationMs);
+    PrintDuration(nextActivationMs, false);
     _display.println();
 
     _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
@@ -121,62 +121,37 @@ void SSD1306Renderer::RenderState(unsigned long nextActivationMs,
     _display.display();
 }
 
-void SSD1306Renderer::PrintDuration(unsigned long durationMs)
+void SSD1306Renderer::PrintDuration(unsigned long durationMs, bool showMilliseconds)
 {
-    if (durationMs < 1000UL)
+    const int maxComponentsToShow = 3;
+    int shownComponents = 0;
+    DurationComponents components = SplitDuration(durationMs);
+
+    if (components.Hours != 0)
     {
-        _display.print(durationMs);
+        _display.print(components.Hours);
+        _display.print(F("h "));
+        shownComponents += 1;
+    }
+
+    if (components.Minutes != 0 && shownComponents < maxComponentsToShow)
+    {
+        _display.print(components.Minutes);
+        _display.print(F("m "));
+        shownComponents += 1;
+    }
+
+    if (components.Seconds != 0 && shownComponents < maxComponentsToShow)
+    {
+        _display.print(components.Seconds);
+        _display.print(F("s "));
+        shownComponents += 1;
+    }
+
+    if (showMilliseconds && components.Milliseconds != 0 && shownComponents < maxComponentsToShow)
+    {
+        _display.print(components.Milliseconds);
         _display.print(F("ms"));
-        return;
-    }
-
-    unsigned long durationSeconds = durationMs / 1000UL;
-
-    if (durationSeconds < 60UL)
-    {
-        unsigned long leftoverMs = durationMs - durationSeconds * 1000UL;
-
-        _display.print(durationSeconds);
-        _display.print(F("s"));
-
-        if (leftoverMs != 0)
-        {
-            _display.print(F(" "));
-            _display.print(leftoverMs);
-            _display.print(F("ms"));
-        }
-        return;
-    }
-
-    unsigned long durationMinutes = durationSeconds / 60UL;
-
-    if (durationMinutes < 60UL)
-    {
-        unsigned long leftoverSeconds = durationSeconds - durationMinutes * 60UL;
-
-        _display.print(durationMinutes);
-        _display.print(F("m "));
-        _display.print(leftoverSeconds);
-        _display.print(F("s"));
-        return;
-    }
-
-    unsigned long durationHours = durationMinutes / 60UL;
-    unsigned long leftoverMinutes = durationMinutes - durationHours * 60UL;
-    unsigned long leftoverSeconds = durationSeconds - durationHours * 60UL * 60UL - leftoverMinutes * 60UL;
-
-    _display.print(durationHours);
-    _display.print(F("h "));
-
-    if (leftoverMinutes != 0)
-    {
-        _display.print(leftoverMinutes);
-        _display.print(F("m "));
-    }
-
-    if (leftoverSeconds != 0)
-    {
-        _display.print(leftoverSeconds);
-        _display.print(F("s"));
+        shownComponents += 1;
     }
 }

@@ -7,7 +7,7 @@ class SSD1306Renderer : public Renderer
 {
     private:
         Adafruit_SSD1306 _display;
-        void PrintDuration(unsigned long durationMs);
+        void PrintDuration(unsigned long durationMs, bool showMilliseconds = true);
 
     public:
         SSD1306Renderer(Menu *menu);

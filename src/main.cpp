@@ -276,9 +276,9 @@ void loop()
         debug(AutofloodController::StateToString(state));
         debug(F(" PERIOD "));
         AutofloodController::DebugPrintDuration(periodSec * 1000UL);
-        debug(F(" DURATION "));
+        debug(F("DURATION "));
         AutofloodController::DebugPrintDuration(durationMs);
-        debug(F(" NEXT ACTIVATION "));
+        debug(F("NEXT ACTIVATION "));
         AutofloodController::DebugPrintDuration(nextActivationMs);
         debugln();
     }
