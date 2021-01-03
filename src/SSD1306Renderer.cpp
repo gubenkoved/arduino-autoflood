@@ -162,14 +162,21 @@ void SSD1306Renderer::PrintDuration(unsigned long durationMs)
     }
 
     unsigned long durationHours = durationMinutes / 60UL;
-    unsigned long leftOverMinutes = durationMinutes - durationHours * 60UL;
+    unsigned long leftoverMinutes = durationMinutes - durationHours * 60UL;
+    unsigned long leftoverSeconds = durationSeconds - durationHours * 60UL * 60UL - leftoverMinutes * 60UL;
 
     _display.print(durationHours);
     _display.print(F("h "));
 
-    if (leftOverMinutes != 0)
+    if (leftoverMinutes != 0)
     {
-        _display.print(leftOverMinutes);
-        _display.print(F("m"));
+        _display.print(leftoverMinutes);
+        _display.print(F("m "));
+    }
+
+    if (leftoverSeconds != 0)
+    {
+        _display.print(leftoverSeconds);
+        _display.print(F("s"));
     }
 }

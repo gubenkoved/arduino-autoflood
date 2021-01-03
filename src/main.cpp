@@ -5,6 +5,7 @@
 #include <Renderer.h>
 #include <AutofloodController.h>
 #include <ApplicationStateController.h>
+#include <PeriodScheduler.h>
 #include <SSD1306Renderer.h>
 
 // http://paulmurraycbr.github.io/ArduinoTheOOWay.html
@@ -14,6 +15,7 @@ Renderer *renderer = NULL;
 SmartButton *smartButton = NULL;
 AutofloodController *autofloodController = NULL;
 ApplicationStateController *appStateController = NULL;
+PeriodScheduler *stateRefresher = NULL;
 
 unsigned long lastTime;
 const int buttonPin = 2;
@@ -22,10 +24,15 @@ const int ledPin = 13;
 
 void renderState()
 {
-    unsigned long periodSec = autofloodController->GetPeriodSeconds();
-    unsigned long durationMs = autofloodController->GetPumpDurationMs();
-    unsigned long nextActivationMs = autofloodController->GetNextActivationMs();
-    renderer->RenderState(nextActivationMs, durationMs, periodSec * 1000UL);
+    ApplicationState state = appStateController->GetState();
+
+    if (state == ApplicationState::Active)
+    {
+        unsigned long periodSec = autofloodController->GetPeriodSeconds();
+        unsigned long durationMs = autofloodController->GetPumpDurationMs();
+        unsigned long nextActivationMs = autofloodController->GetNextActivationMs();
+        renderer->RenderState(nextActivationMs, durationMs, periodSec * 1000UL);
+    }
 }
 
 void onButtonShortPress()
@@ -158,9 +165,7 @@ void setup()
     Serial.begin(9600);
 
     // wait for serial port to connect. Needed for native USB port only
-    while (!Serial)
-    {
-    }
+    while (!Serial) { }
 
     debugln(F("AUTOFLOOD :: BOOTING UP"));
     debugln(F("DEBUGGING MODE!"));
@@ -223,7 +228,7 @@ void setup()
 
     lastTime = millis();
 
-    renderState();
+    stateRefresher = new PeriodScheduler(renderState, STATE_REFRESH_INTERVAL_MS, true);
 }
 
 unsigned long lastStatTime = 0;
@@ -251,6 +256,7 @@ void loop()
     smartButton->loop();
     autofloodController->HandleElapsed(elapsedMs);
     appStateController->HandleElapsed(elapsedMs);
+    stateRefresher->HandleElapsed(elapsedMs);
 
     if (currentTime - lastStatTime >= DEBUG_STATE_REPORT_INTERVAL_MS)
     {
