@@ -15,23 +15,19 @@ SmartButton::SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)(),
     pinMode(_pin, INPUT);
 }
 
-void SmartButton::loop()
+void SmartButton::HandleElapsed(unsigned long elapsedMs)
 {
-    int curButtonState = digitalRead(_pin);
+    int state = digitalRead(_pin);
 
-    if (curButtonState == LOW)
+    if (state == LOW)
     {
-        // catch the moment we release the button
-        if (_lastState == HIGH)
+        if (_pressDurationMs != 0)
         {
-            unsigned long duration = millis() - _pressedAt;
-            _pressedAt = 0;
-
             debug(F("Button is released, duration was "));
-            debug(duration);
+            debug(_pressDurationMs);
             debugln(F("ms"));
 
-            if (duration >= _longPressThresholdMs)
+            if (_pressDurationMs >= _longPressThresholdMs)
             {
                 if (_onLongPress != NULL)
                     _onLongPress();
@@ -42,16 +38,14 @@ void SmartButton::loop()
                     _onShortPress();
             }
         }
-    }
-    else // button is pressed
-    {
-        if (_pressedAt == 0)
-        {
-            _pressedAt = millis();
-            debug(F("Pressed at "));
-            debugln(_pressedAt);
-        }
-    }
 
-    _lastState = curButtonState;
+        _pressDurationMs = 0;
+    }
+    else // state == HIGH button is pressed
+    {
+        if (_pressDurationMs == 0)
+            debugln(F("Button pressed!"));
+
+        _pressDurationMs += elapsedMs;
+    }
 }

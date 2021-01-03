@@ -117,7 +117,7 @@ void SSD1306Renderer::RenderState(unsigned long nextActivationMs,
 
     _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
     _display.setTextColor(SSD1306_WHITE);
-    _display.println(".. long press to MENU");
+    _display.println(F(".. long press to MENU"));
     _display.display();
 }
 

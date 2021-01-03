@@ -9,10 +9,9 @@ private:
     void (*_onShortPress)();
     void (*_onLongPress)();
     unsigned int _longPressThresholdMs;
-    int _lastState = LOW;
-    unsigned long _pressedAt = 0;
+    unsigned long _pressDurationMs = 0;
 public:
     SmartButton(int pin, void (*onShortPress)(), void (*onLongPress)() = NULL, unsigned int longPressThresholdMs = 600U);
-    void loop();
+    void HandleElapsed(unsigned long elapsedMs);
 };
 #endif /* INCLUDE_SMARTBUTTON */

@@ -253,7 +253,7 @@ void loop()
     lastTime = currentTime;
 
     // let dependencies handle the elapsed time
-    smartButton->loop();
+    smartButton->HandleElapsed(elapsedMs);
     autofloodController->HandleElapsed(elapsedMs);
     appStateController->HandleElapsed(elapsedMs);
     stateRefresher->HandleElapsed(elapsedMs);
